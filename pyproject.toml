@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "im-python"
+version = "0.1.0"
+description = "Python template with imgui-bundle GUI demo, TOML config, and GitHub Actions CI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "norad32" }
+]
+dependencies = [
+  "imgui-bundle"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "build",
+]
+
+[project.scripts]
+im-python = "im_python.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
