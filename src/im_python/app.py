@@ -1,4 +1,5 @@
 from __future__ import annotations
+from importlib.resources import files
 
 
 def run() -> None:
@@ -10,6 +11,9 @@ def run() -> None:
     try:
         # Import here to keep imports light for non-GUI contexts (tests, docs, etc.).
         from imgui_bundle import immapp, imgui, hello_imgui  # type: ignore
+
+        hello_imgui.set_assets_folder(str(files("im_python").joinpath("assets")))
+
     except Exception as exc:  # pragma: no cover - diagnostic path
         raise RuntimeError(
             "imgui-bundle is required to run the GUI demo. "
