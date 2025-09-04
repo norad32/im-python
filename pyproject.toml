@@ -2,6 +2,12 @@
 requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/im_python"]
+
+[tool.hatch.build]
+include = ["src/im_python"]
+
 [project]
 name = "im-python"
 version = "0.1.0"
