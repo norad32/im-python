@@ -26,6 +26,8 @@ dependencies = [
 dev = [
   "pytest",
   "pytest-cov",
+  "ruff",
+  "mypy",
   "pyinstaller",
   "build",
 ]
