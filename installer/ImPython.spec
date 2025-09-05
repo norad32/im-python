@@ -5,7 +5,7 @@ datas = collect_data_files("im_python", includes=["assets/*"])
 block_cipher = None
 
 a = Analysis(
-    ['../scripts/run_app.py'],
+    ["../scripts/run_app.py"],
     pathex=[],
     binaries=[],
     datas=datas,
@@ -25,12 +25,12 @@ exe = EXE(
     a.binaries,
     a.zipfiles,
     a.datas,
-    name='ImPython',
-    console=False,            # True if you want a console
+    name="ImPython",
+    console=False,  # True if you want a console
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,                # e.g. "installer/app.ico" on Windows
+    icon=None,  # e.g. "installer/app.ico" on Windows
 )
