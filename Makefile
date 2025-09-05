@@ -25,18 +25,14 @@ help:
 	@echo "Targets:"
 	@echo "  venv         Create local virtualenv (.venv)"
 	@echo "  install      Install project in dev mode (+ dev tools)"
-	@echo "  tools        Ensure build/test tools are installed"
 	@echo "  test         Run pytest (with coverage)"
 	@echo "  lint         Run ruff (lint) + ruff format --check"
 	@echo "  typecheck    Run mypy on src/"
 	@echo "  wheel        Build wheel and sdist into ./dist"
 	@echo "  exe          Build one-file executable via PyInstaller spec"
-	@echo "  run          Run CLI help to sanity-check"
 	@echo "  clean        Remove build artifacts"
-	@echo "  distclean    Also remove .venv"
 	@echo ""
 
-# ----- Environment -----
 .PHONY: venv
 venv: $(VENV_PY)
 
@@ -44,54 +40,42 @@ $(VENV_PY):
 	python -m venv .venv
 	$(VENV_PY) -m pip install -U pip
 
-# Ensure dev tools exist (separate from editable install)
-.PHONY: tools
-tools: venv
-	$(PIP) install -U build pyinstaller pytest pytest-cov ruff mypy
 
 .PHONY: install
 install: venv
 	-$(PIP) install -e ".[dev,gui]" || true
 	$(PIP) install -e .
 
-# ----- Quality / Tests -----
 .PHONY: test
-test: tools
+test: install
 	$(PY) -m pytest --cov=$(PKG) --cov-report=term-missing -vv
 
 .PHONY: lint
-lint: tools
+lint: install
 	$(PY) -m ruff check .
 	$(PY) -m ruff format --check
 
 .PHONY: typecheck
-typecheck: tools
+typecheck: install
 	$(PY) -m mypy src/$(PKG)
 
-# ----- Build artifacts -----
 .PHONY: wheel
-wheel: tools
+wheel: install
 	$(PY) -m build
 
 .PHONY: exe
-exe: tools
+exe: install
 	$(PY) -m PyInstaller $(SPEC)
 
-# ----- Run / Debug -----
-.PHONY: run
-run: venv
-	$(PY) -m $(PKG) --help || true
-	@echo "Executable (if built): $(EXE)"
-
-# ----- Cleanups -----
 .PHONY: clean
 clean:
-	- $(PY) -c "import glob,os,shutil,pathlib; \
-paths=('build','dist','.pytest_cache','.mypy_cache'); \
-[shutil.rmtree(p, True) for p in paths]; \
-[os.remove(f) for f in glob.glob('*.spec') if pathlib.Path(f).name!='ImPython.spec']; \
-[shutil.rmtree(p, True) for p in pathlib.Path('.').rglob('__pycache__')]"
-
-.PHONY: distclean
-distclean: clean
-	- $(PY) -c "import shutil; shutil.rmtree('.venv', True)"
+	@set -euo pipefail; \
+	spec="$(SPEC)"; \
+	to_delete=(dist .venv build .mypy_cache .pytest_cache .ruff_cache .coverage I_m_Python.ini); \
+	for p in "$${to_delete[@]}"; do \
+	  if [[ -n "$$p" && ( -e "$$p" || -L "$$p" ) ]]; then \
+	    echo "Removing $$p"; rm -rf -- "$$p"; \
+	  else \
+	    echo "Skipping $$p (not found)"; \
+	  fi; \
+	done
