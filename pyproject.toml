@@ -19,14 +19,19 @@ authors = [
   { name = "norad32" }
 ]
 dependencies = [
-  "imgui-bundle"
+  "typer>=0.12.3"
 ]
 
 [project.optional-dependencies]
 dev = [
   "pytest",
   "pytest-cov",
+  "pyinstaller",
   "build",
+]
+
+gui = [
+  "imgui-bundle"
 ]
 
 [project.scripts]
