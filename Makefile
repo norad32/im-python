@@ -86,22 +86,12 @@ run: venv
 # ----- Cleanups -----
 .PHONY: clean
 clean:
-	- python - <<-'PY'
-	import glob, os, shutil, pathlib
-	for p in ['build','dist','.pytest_cache','.mypy_cache']:
-		shutil.rmtree(p, ignore_errors=True)
-	for f in glob.glob('*.spec'):
-		# keep only if it's literally in CWD and named ImPython.spec
-		if pathlib.Path(f).name != 'ImPython.spec':
-			try: os.remove(f)
-			except FileNotFoundError: pass
-	for p in pathlib.Path('.').rglob('__pycache__'):
-		shutil.rmtree(p, ignore_errors=True)
-	PY
+	- $(PY) -c "import glob,os,shutil,pathlib; \
+paths=('build','dist','.pytest_cache','.mypy_cache'); \
+[shutil.rmtree(p, True) for p in paths]; \
+[os.remove(f) for f in glob.glob('*.spec') if pathlib.Path(f).name!='ImPython.spec']; \
+[shutil.rmtree(p, True) for p in pathlib.Path('.').rglob('__pycache__')]"
 
 .PHONY: distclean
 distclean: clean
-	- python - <<'PY'
-	import shutil
-	shutil.rmtree('.venv', ignore_errors=True)
-	PY
+	- $(PY) -c "import shutil; shutil.rmtree('.venv', True)"
