@@ -11,7 +11,7 @@ include = ["src/im_python"]
 [project]
 name = "im-python"
 version = "0.1.0"
-description = "Python template with imgui-bundle GUI demo, TOML config, and GitHub Actions CI."
+description = "Python template with imgui-bundle GUI, TOML config, and GitHub Actions CI."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

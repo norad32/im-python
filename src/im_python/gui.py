@@ -3,7 +3,7 @@ from importlib.resources import files
 
 
 def run() -> None:
-    """Run a GUI app."""
+    """Run GUI app."""
     try:
         # Import here to keep imports light for non-GUI contexts (tests, docs, etc.).
         from imgui_bundle import immapp, imgui, hello_imgui  # type: ignore
