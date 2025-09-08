@@ -7,7 +7,6 @@ import typer
 app = typer.Typer(
     name="im-python",
     help="I'm Python template",
-    no_args_is_help=True,
 )
 
 
@@ -19,12 +18,13 @@ def _print_version() -> None:
     typer.echo(version)
 
 
-@app.callback()
+@app.callback(invoke_without_command=True)
 def _root(
+    context: typer.Context,
     version: bool = typer.Option(
         False,
         "--version",
-        "-V",
+        "-v",
         help="Show version and exit.",
         is_eager=True,
     ),
@@ -33,12 +33,16 @@ def _root(
         _print_version()
         raise typer.Exit(0)
 
+    if context.invoked_subcommand is None:
+        code = gui()
+        raise typer.Exit(code)
+
 
 @app.command(help="Launch the GUI demo")
-def gui() -> None:
-    from .gui import run as run_gui
+def gui() -> int:
+    from .gui import run
 
-    code = run_gui()
+    code = run()
     raise typer.Exit(code)
 
 

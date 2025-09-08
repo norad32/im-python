@@ -1,4 +1,4 @@
-from im_python.cli import main
+from im_python.gui import run
 
 if __name__ == "__main__":
-    main()
+    run()
