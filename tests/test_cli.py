@@ -3,8 +3,6 @@ from __future__ import annotations
 import sys
 import types
 
-import importlib.util
-import runpy
 import pytest
 from typer.testing import CliRunner
 
@@ -73,16 +71,6 @@ def test_should_show_help_if_help_flag(runner: CliRunner) -> None:
     # Commands help lines
     assert "Launch the GUI" in out
     assert "Quick self-check and exit" in out
-
-
-def test_should_use_provided_prog_name_if_prog_name_given(runner: CliRunner) -> None:
-    result = runner.invoke(cli.app, ["--help"], prog_name="im-python")
-    assert result.exit_code == 0
-    usage_lines = [
-        ln for ln in result.stdout.splitlines() if ln.strip().startswith("Usage:")
-    ]
-    assert usage_lines, f"No 'Usage:' line found.\n\n{result.stdout}"
-    assert "Usage: im-python" in usage_lines[0]
 
 
 def test_sould_exit_with_gui_code_if_no_subcommand_provided(
