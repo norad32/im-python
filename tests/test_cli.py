@@ -65,7 +65,7 @@ def test_should_show_help_if_help_flag(runner: CliRunner) -> None:
     assert result.exit_code == 0
     out = result.stdout
     # App help
-    assert "I'm Python template" in out
+    assert "Hello I'm Python" in out
     # Options/help lines
     assert "Show version and exit." in out
     # Commands help lines

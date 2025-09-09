@@ -6,7 +6,7 @@ import typer
 
 app = typer.Typer(
     name="im-python",
-    help="I'm Python template",
+    help="Hello I'm Python",
 )
 
 
