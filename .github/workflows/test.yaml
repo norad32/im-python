@@ -1,23 +1,23 @@
-name: CI (Lint & Test)
+name: Test & Lint
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
+  permissions:
+    contents: read
+
 jobs:
-  lint_and_test:
+  test_and_lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.10]
+
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          python-version: "3.10"
 
       - name: Install dependencies
         run: |
