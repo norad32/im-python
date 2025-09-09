@@ -34,16 +34,16 @@ def _root(
         raise typer.Exit(0)
 
     if context.invoked_subcommand is None:
-        code = gui()
-        raise typer.Exit(code)
+        gui()
+        raise typer.Exit(0)
 
 
 @app.command(help="Launch the GUI demo")
 def gui() -> int:
     from .gui import run
 
-    code = run()
-    raise typer.Exit(code)
+    run()
+    raise typer.Exit(0)
 
 
 @app.command(help="Quick self-check and exit")
