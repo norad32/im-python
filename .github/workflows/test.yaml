@@ -21,6 +21,10 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxxf86vm-dev \
+          libgl1-mesa-dev xorg-dev
           python -m pip install --upgrade pip
           pip install -e .[dev,gui]
 
