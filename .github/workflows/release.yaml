@@ -3,6 +3,9 @@ on:
   push:
     tags: ["v*"]
 
+permissions:
+  contents: write
+
 jobs:
   build_wheel:
     runs-on: ubuntu-latest
@@ -29,7 +32,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifacts@v3
         with:
-          name: dist-packages
+          name: wheel
           path: dist/*
 
   build_exe:
@@ -57,5 +60,30 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifacts@v3
         with:
-          name: dist-packages
-          path: dist/ImPython
+          name: app-image
+          path: dist/*
+
+  publish_release:
+    runs-on: ubuntu-latest
+    needs: [build_wheel, build_exe]
+    steps:
+      - name: Download wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: release_assets
+
+      - name: Download AppImage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-image
+          path: release_assets
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release_assets/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
