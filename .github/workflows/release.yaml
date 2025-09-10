@@ -1,0 +1,89 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build_wheel:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxxf86vm-dev \
+          libgl1-mesa-dev xorg-dev
+          python -m pip install --upgrade pip
+          pip install .[dev,gui]
+
+      - name: Build wheel
+        run: python -m build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: wheel
+          path: dist/*
+
+  build_exe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxxf86vm-dev \
+          libgl1-mesa-dev xorg-dev
+          python -m pip install --upgrade pip
+          pip install .[dev,gui]
+
+      - name: Build executable
+        run: python -m PyInstaller installer/ImPython.spec
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: app-image
+          path: dist/*
+
+  publish_release:
+    runs-on: ubuntu-latest
+    needs: [build_wheel, build_exe]
+    steps:
+      - name: Download wheel artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: release_assets
+
+      - name: Download AppImage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-image
+          path: release_assets
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release_assets/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
