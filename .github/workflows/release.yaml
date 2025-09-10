@@ -30,7 +30,7 @@ jobs:
         run: python -m build
 
       - name: Upload artifacts
-        uses: actions/upload-artifacts@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: wheel
           path: dist/*
@@ -58,7 +58,7 @@ jobs:
         run: python -m PyInstaller installer/ImPython.spec
 
       - name: Upload artifacts
-        uses: actions/upload-artifacts@v3
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: app-image
           path: dist/*
