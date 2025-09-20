@@ -168,7 +168,6 @@ def setup_gui(level=Level.ERROR) -> None:
         sinks = [handler for handler in _sinks if not isinstance(handler, ImGuiHandler)]
         sinks.append(gui_handler)
         _stop_listener()
-        _remove_handlers()
         _rebuild_listener(sinks)
 
 
