@@ -1,9 +1,13 @@
 import sys
 from pathlib import Path
-from typing import Final
+from typing import Final, cast
 from dataclasses import dataclass
 from importlib.resources import files
+from .app_logger import app_logger
 from .app_logger.levels import Level
+from .app_logger.gui_handler import GuiHandler
+
+_logger = app_logger.get(__name__)
 
 
 def _detect_app_name(default="app"):
@@ -37,7 +41,10 @@ class Config:
 
 @dataclass
 class State:
-    is_log_panel_visible: bool = False
+    log_handler: GuiHandler
+    logs_panel_visible: bool = False
+    logs_autoscroll: bool = True
+    logs_count: int = 0
 
 
 def _handle_log_panel_toggle_key(io, state: State) -> None:
@@ -46,13 +53,13 @@ def _handle_log_panel_toggle_key(io, state: State) -> None:
         return
     for codepoint in io.input_queue_characters:
         if codepoint == ord(LOG_PANEL_TOGGLE_KEY):
-            state.is_log_panel_visible = not state.is_log_panel_visible
+            state.logs_panel_visible = not state.logs_panel_visible
             break
 
 
 def _render_log_panel(imgui, hello_imgui, state: State) -> None:
     """Render non-movable, height-resizable log panel, that sticks to the viewport bottom."""
-    if not state.is_log_panel_visible:
+    if not state.logs_panel_visible:
         return
 
     viewport = imgui.get_main_viewport()
@@ -90,13 +97,39 @@ def _render_log_panel(imgui, hello_imgui, state: State) -> None:
         )
         imgui.set_window_pos(desired_pos)
 
-        imgui.text("Logs go here.")
-        imgui.text(f"Current height: {int(current_size.y)} px")
+        _, state.logs_autoscroll = imgui.checkbox("Autoscroll", state.logs_autoscroll)
+
+        imgui.same_line()
+        if imgui.button("Clear"):
+            state.log_handler.clear()
+            state.logs_count = 0
+
+        if imgui.begin_child("##logs"):
+            at_bottom_before = imgui.get_scroll_y() >= imgui.get_scroll_max_y() - 1
+
+            logs_count = 0
+            records = state.log_handler.snapshot()
+            for record in records:
+                logs_count += 1
+                imgui.text_wrapped(record.message)
+
+            if state.logs_autoscroll and (
+                logs_count > state.logs_count or at_bottom_before
+            ):
+                imgui.set_scroll_here_y(1)
+
+            state.logs_count = logs_count
+
+        imgui.end_child()
+
     imgui.end()
 
 
 def run(log_level: Level) -> None:
     """Run GUI app."""
+    log_handler = cast(GuiHandler, app_logger.setup_gui(log_level))
+    state = State(log_handler)
+
     try:
         # Import here to keep imports light for non-GUI contexts (tests, docs, etc.).
         from imgui_bundle import immapp, imgui, hello_imgui  # type: ignore
@@ -104,15 +137,15 @@ def run(log_level: Level) -> None:
         hello_imgui.set_assets_folder(str(files("im_python").joinpath("assets")))
 
     except ImportError as e:  # pragma: no cover - diagnostic path
+        _logger.error("imgui-bundle not installed")
         raise RuntimeError(
             "imgui-bundle is required to run the GUI app."
             "Install with `pip install imgui-bundle`"
         ) from e
 
-    state = State()
+    _logger.info("GUI started")
 
     def gui() -> None:
-
         io = imgui.get_io()
         _handle_log_panel_toggle_key(io, state)
 
@@ -122,8 +155,15 @@ def run(log_level: Level) -> None:
         imgui.text("- Add panels, menus, docking, etc.")
 
         if imgui.button(f"Show Logs ({LOG_PANEL_TOGGLE_KEY})"):
-            state.is_log_panel_visible = not state.is_log_panel_visible
+            state.logs_panel_visible = not state.logs_panel_visible
         imgui.same_line()
+
+        if imgui.button("Generate test logs"):
+            _logger.debug("Debug log")
+            _logger.info("Info log")
+            _logger.warning("Warning log")
+            _logger.error("Error log")
+            _logger.critical("Critical log")
 
         if imgui.button("Close"):
             hello_imgui.get_runner_params().app_shall_exit = True
@@ -132,6 +172,6 @@ def run(log_level: Level) -> None:
 
     immapp.run(
         gui_function=gui,
-        window_title="I'm Python",
-        window_size=(900, 600),
+        window_title=WINDOW_TITLE,
+        window_size=DEFAULT_WINDOW_SIZE,
     )
