@@ -8,12 +8,6 @@ import threading
 from .levels import Level
 
 
-try:
-    from platformdirs import user_log_dir
-except ImportError:
-    user_log_dir = None
-
-
 def _detect_app_name(default="app"):
     if getattr(sys, "frozen", False):
         return Path(sys.executable).stem
@@ -41,12 +35,16 @@ _lock = threading.RLock()
 
 
 def _get_log_path() -> Path:
-    if user_log_dir:
-        log_dir = Path(user_log_dir(APP_NAME))
-        log_dir.mkdir(parents=True, exist_ok=True)
-        return log_dir / f"{APP_NAME}.log"
+    try:
+        from platformdirs import user_log_dir
 
-    return Path(f"{APP_NAME}.log")
+        log_dir = Path(user_log_dir(APP_NAME))
+    except ImportError:
+        log_dir = Path("logs")
+        _logger.error(f"No user log dir. Defaulting to {log_dir}")
+
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return log_dir / f"{APP_NAME}.log"
 
 
 def _build_formatter() -> logging.Formatter:
