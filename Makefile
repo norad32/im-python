@@ -24,7 +24,7 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  venv         Create local virtualenv (.venv)"
-	@echo "  install      Install project in dev mode (+ dev tools)"
+	@echo "  install      Install project all project dependencies"
 	@echo "  test         Run pytest (with coverage)"
 	@echo "  lint         Run ruff (lint) + ruff format --check"
 	@echo "  typecheck    Run mypy on src/"
@@ -43,7 +43,7 @@ $(VENV_PY):
 
 .PHONY: install
 install: venv
-	-$(PIP) install -e ".[dev,gui]" || true
+	-$(PIP) install -e ".[dev,gui,exe]" || true
 	$(PIP) install -e .
 
 .PHONY: test
