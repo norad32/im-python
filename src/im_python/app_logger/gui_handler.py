@@ -12,7 +12,7 @@ class GuiRecord(NamedTuple):
     message: str
 
 
-class ImGuiHandler(logging.Handler):
+class GuiHandler(logging.Handler):
     def __init__(self, capacity: int = 1024):
         super().__init__()
         self.capacity = capacity
