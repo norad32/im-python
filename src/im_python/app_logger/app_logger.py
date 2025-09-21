@@ -7,6 +7,7 @@ import atexit
 import threading
 from .levels import Level
 
+
 try:
     from platformdirs import user_log_dir
 except ImportError:
@@ -144,31 +145,33 @@ def setup(level=Level.ERROR) -> None:
         atexit.register(shutdown)
 
 
-def setup_gui(level=Level.ERROR) -> None:
+def setup_gui(level=Level.ERROR) -> logging.Handler:
     """Add the ImGui sink and rebuild the listener."""
     if _listener is None:
         raise RuntimeError("Cannot set-up gui logger before logger is set-up")
 
     with _lock:
         try:
-            from .im_gui_handler import ImGuiHandler
+            from .gui_handler import GuiHandler
         except ImportError as e:
             raise RuntimeError("ImGui logging is not available") from e
 
         gui_handler = next(
-            (handler for handler in _sinks if isinstance(handler, ImGuiHandler)), None
+            (handler for handler in _sinks if isinstance(handler, GuiHandler)), None
         )
 
         if gui_handler is None:
-            gui_handler = ImGuiHandler()
+            gui_handler = GuiHandler()
 
         gui_handler.setLevel(level)
         gui_handler.setFormatter(_build_formatter())
 
-        sinks = [handler for handler in _sinks if not isinstance(handler, ImGuiHandler)]
+        sinks = [handler for handler in _sinks if not isinstance(handler, GuiHandler)]
         sinks.append(gui_handler)
         _stop_listener()
         _rebuild_listener(sinks)
+
+        return gui_handler
 
 
 def shutdown() -> None:
