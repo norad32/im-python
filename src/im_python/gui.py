@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Final, cast
 from dataclasses import dataclass
 from importlib.resources import files
+from configparser import ConfigParser
 from .app_logger import app_logger
 from .app_logger.levels import Level
 from .app_logger.gui_handler import GuiHandler
@@ -10,7 +11,7 @@ from .app_logger.gui_handler import GuiHandler
 _logger = app_logger.get(__name__)
 
 
-def _detect_app_name(default="app"):
+def _detect_app_name(default="im-python"):
     if getattr(sys, "frozen", False):
         return Path(sys.executable).stem
 
@@ -24,6 +25,19 @@ def _detect_app_name(default="app"):
         if "__file__" in globals()
         else default
     )
+
+
+def _get_config_path() -> Path:
+    try:
+        from platformdirs import user_config_dir
+
+        config_dir = Path(user_config_dir(_detect_app_name()))
+    except ImportError:
+        config_dir = Path("config")
+        _logger.error(f"No user log dir. Defaulting to {config_dir}")
+
+    config_dir.mkdir(parents=True, exist_ok=True)
+    return config_dir
 
 
 WINDOW_TITLE: Final[str] = _detect_app_name("I'm Python")
@@ -45,6 +59,45 @@ class State:
     logs_panel_visible: bool = False
     logs_autoscroll: bool = True
     logs_count: int = 0
+
+
+def _load_state(ini_path: Path, state: State) -> None:
+    if not ini_path.exists():
+        _logger.info(f"No config found at {ini_path}. Using defaults")
+        return
+
+    config = ConfigParser()
+
+    try:
+        config.read(ini_path)
+        if config.has_section("State"):
+            state.logs_panel_visible = config.getboolean(
+                "State", "logs_panel_visible", fallback=state.logs_panel_visible
+            )
+            state.logs_autoscroll = config.getboolean(
+                "State", "logs_autoscroll", fallback=state.logs_autoscroll
+            )
+    except Exception as e:
+        _logger.warning("Could not read State from ini: %s", e)
+
+
+def _save_state(ini_path: Path, state: State) -> None:
+    ini_path.parent.mkdir(parents=True, exist_ok=True)
+    cfg = ConfigParser()
+
+    if ini_path.exists():
+        try:
+            cfg.read(ini_path)
+        except Exception:
+            cfg = ConfigParser()
+
+    if not cfg.has_section("State"):
+        cfg.add_section("State")
+    cfg.set("State", "logs_panel_visible", "1" if state.logs_panel_visible else "0")
+    cfg.set("State", "logs_autoscroll", "1" if state.logs_autoscroll else "0")
+
+    with ini_path.open("w", encoding="utf-8") as f:
+        cfg.write(f)
 
 
 def _handle_log_panel_toggle_key(io, state: State) -> None:
@@ -143,6 +196,9 @@ def run(log_level: Level) -> None:
             "Install with `pip install imgui-bundle`"
         ) from e
 
+    ini_path = _get_config_path() / "imgui.ini"
+    _load_state(ini_path, state)
+
     _logger.info("GUI started")
 
     def gui() -> None:
@@ -170,8 +226,13 @@ def run(log_level: Level) -> None:
 
         _render_log_panel(imgui, hello_imgui, state)
 
-    immapp.run(
-        gui_function=gui,
-        window_title=WINDOW_TITLE,
-        window_size=DEFAULT_WINDOW_SIZE,
-    )
+    runner_parameters = hello_imgui.RunnerParams()
+    runner_parameters.callbacks.show_gui = gui
+    runner_parameters.app_window_params.window_title = WINDOW_TITLE
+    runner_parameters.ini_folder_type = hello_imgui.IniFolderType.absolute_path
+    runner_parameters.ini_filename = str(ini_path)
+    runner_parameters.ini_filename_use_app_window_title = False
+
+    immapp.run(runner_parameters)
+
+    _save_state(ini_path, state)
