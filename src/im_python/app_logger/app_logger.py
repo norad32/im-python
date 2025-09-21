@@ -48,8 +48,10 @@ def _get_log_path() -> Path:
 
 
 def _build_formatter() -> logging.Formatter:
-    format_str = "{asctime} | {levelname:8s} | {name}:{lineno} | {message}"
-    date_format = "%Y-%m-%d %H:%M:%S%z"
+    format_str = (
+        "{asctime}.{msecs:03.0f} | {levelname:8s} | {name}:{lineno} | {message}"
+    )
+    date_format = "%Y-%m-%d %H:%M:%S"
     formatter = logging.Formatter(fmt=format_str, datefmt=date_format, style="{")
     return formatter
 
