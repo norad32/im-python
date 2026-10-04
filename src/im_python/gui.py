@@ -1,12 +1,13 @@
 import sys
-from pathlib import Path
-from typing import Final, cast
+from configparser import ConfigParser
 from dataclasses import dataclass
 from importlib.resources import files
-from configparser import ConfigParser
+from pathlib import Path
+from typing import Final, cast
+
 from .app_logger import app_logger
-from .app_logger.levels import Level
 from .app_logger.gui_handler import GuiHandler
+from .app_logger.levels import Level
 
 _logger = app_logger.get(__name__)
 
@@ -185,7 +186,7 @@ def run(log_level: Level) -> None:
 
     try:
         # Import here to keep imports light for non-GUI contexts (tests, docs, etc.).
-        from imgui_bundle import immapp, imgui, hello_imgui  # type: ignore
+        from imgui_bundle import hello_imgui, imgui, immapp  # type: ignore
 
         hello_imgui.set_assets_folder(str(files("im_python").joinpath("assets")))
 

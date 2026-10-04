@@ -1,8 +1,12 @@
 import sys
-from importlib.metadata import PackageNotFoundError, version as pkg_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as pkg_version
+
 import typer
-from . import app_logger
+
 from im_python.app_logger.levels import Level
+
+from . import app_logger
 
 _logger = app_logger.get(__name__)
 

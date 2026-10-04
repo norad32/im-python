@@ -1,5 +1,5 @@
-from enum import IntEnum
 import logging
+from enum import IntEnum
 from typing import Final, Self
 
 _ALIASES: Final[dict[str, str]] = {"WARN": "WARNING", "FATAL": "CRITICAL"}

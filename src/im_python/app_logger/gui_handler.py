@@ -1,7 +1,7 @@
 import logging
 import threading
 from collections import deque
-from typing import Deque, NamedTuple
+from typing import NamedTuple
 
 
 class GuiRecord(NamedTuple):
@@ -16,7 +16,7 @@ class GuiHandler(logging.Handler):
     def __init__(self, capacity: int = 1024):
         super().__init__()
         self.capacity = capacity
-        self._records: Deque[GuiRecord] = deque(maxlen=capacity)
+        self._records: deque[GuiRecord] = deque(maxlen=capacity)
         self._lock = threading.Lock()
 
     def emit(self, record: logging.LogRecord) -> None:

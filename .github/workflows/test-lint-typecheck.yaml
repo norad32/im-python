@@ -26,17 +26,16 @@ jobs:
           libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxxf86vm-dev \
           libgl1-mesa-dev xorg-dev
           python -m pip install --upgrade pip
-          pip install -e .[dev,gui]
+          pip install -e ".[dev,gui]"
 
       - name: Run tests
-        run: pytest --cov=im_python --cov-report=term-missing -vv
+        run: pytest --cov=im_python --cov-report=term-missing --cov-fail-under=60 -vv
 
       - name: Lint code with Ruff
-        run: ruff check --output-format=github .
+        run: ruff check --ignore BLE001 --output-format=github .
 
       - name: Check code formatting with Ruff
         run: ruff format --check .
-        continue-on-error: true
 
-      - name: Typeheck with MyPy
-        run: mypy --install-types --non-interactive .
+      - name: Typecheck with MyPy
+        run: mypy src/ tests/

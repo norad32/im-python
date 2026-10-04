@@ -1,10 +1,11 @@
-from pathlib import Path
-import logging
-from logging.handlers import RotatingFileHandler, QueueHandler, QueueListener
-import sys
-import queue
 import atexit
+import logging
+import queue
+import sys
 import threading
+from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
+from pathlib import Path
+
 from .levels import Level
 
 
