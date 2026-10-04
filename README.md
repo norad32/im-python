@@ -20,7 +20,7 @@ sudo pacman -S --needed base-devel python python-pip git
 
 **Windows**
 
-- Python 3.10–3.12 (64-bit) from python.org or the Store
+- Python 3.14 (64-bit) from python.org or the Store
 - `git` if you’ll clone the repo
 
 ### Makefile

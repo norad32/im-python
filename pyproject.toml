@@ -13,7 +13,7 @@ name = "im-python"
 version = "0.1.0"
 description = "Python template with imgui-bundle GUI, TOML config, and GitHub Actions CI."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 license = { text = "MIT" }
 authors = [
   { name = "norad32" }
