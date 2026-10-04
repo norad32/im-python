@@ -52,7 +52,7 @@ jobs:
           libx11-dev libxi-dev libxcursor-dev libxrandr-dev libxxf86vm-dev \
           libgl1-mesa-dev xorg-dev
           python -m pip install --upgrade pip
-          pip install .[dev,gui]
+          pip install ".[dev,gui,exe]"
 
       - name: Build executable
         run: python -m PyInstaller installer/ImPython.spec
@@ -60,8 +60,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: app-image
-          path: dist/*
+          name: linux-executable
+          path: dist/ImPython
 
   publish_release:
     runs-on: ubuntu-latest
@@ -73,10 +73,10 @@ jobs:
           name: wheel
           path: release_assets
 
-      - name: Download AppImage artifact
+      - name: Download Linux executable artifact
         uses: actions/download-artifact@v4
         with:
-          name: app-image
+          name: linux-executable
           path: release_assets
 
       - name: Create GitHub Release
