@@ -1,69 +1,63 @@
 # I'm Python
 
-A Python project template that uses **[imgui-bundle](https://pypi.org/project/imgui-bundle/)** for GUI, with all configuration centralized in a **`pyproject.toml`** (TOML — "tom").
-It’s set up for Linux, Windows, and CI via GitHub Actions.
+[![Tests, lint & typecheck](https://github.com/norad32/im-python/actions/workflows/test-lint-typecheck.yaml/badge.svg?branch=main)](https://github.com/norad32/im-python/actions/workflows/test-lint-typecheck.yaml)
+[![Release build](https://github.com/norad32/im-python/actions/workflows/release.yaml/badge.svg)](https://github.com/norad32/im-python/actions/workflows/release.yaml)
 
----
+A starter desktop GUI built with [imgui-bundle](https://pypi.org/project/imgui-bundle/). It includes a CLI, persistent GUI preferences, a GUI log panel, tests, and GitHub Actions checks. Requires Python 3.14 or newer.
 
-## Quickstart
+## Run locally
 
-### System prerequisites
-
-**Linux (Arch)** – make sure you have graphics drivers and common X11/Wayland/OpenGL runtime libs installed. On Arch, you likely already do, otherwise for typical desktop installs:
+On Linux, create an environment and install the GUI extra:
 
 ```bash
-sudo pacman -S --needed base-devel python python-pip git
-# (most systems already have the GL/X11 runtime libs required by imgui-bundle wheels)
+python3.14 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e ".[gui]"
+python -m im_python
 ```
 
-> If you run Wayland-only, `imgui-bundle` still works thanks to its backends. The provided demo uses the `immapp` helper which handles windowing for you.
+On Windows PowerShell:
 
-**Windows**
+```powershell
+py -3.14 -m venv .venv
+.venv\\Scripts\\Activate.ps1
+python -m pip install -e ".[gui]"
+python -m im_python
+```
 
-- Python 3.14 (64-bit) from python.org or the Store
-- `git` if you’ll clone the repo
+## Develop and test
 
-### Makefile
-
-Just run
+Install the development and GUI dependencies, then run the checks used in CI:
 
 ```bash
-make
+python -m pip install -e ".[dev,gui]"
+pytest --cov=im_python --cov-report=term-missing --cov-fail-under=60 -vv
+ruff check --ignore BLE001 --output-format=github .
+ruff format --check .
+mypy src/ tests/
 ```
 
-to see how to use the project.
+`BLE001` is excluded because the logger and config code intentionally catch errors around cleanup and malformed user settings. The other Ruff checks, formatting, type checking, and the 60% coverage minimum are blocking CI checks.
+
+For Make targets, run `make` to see the available commands.
+
+## Release artifacts
+
+Pushing a `v*` tag triggers the release workflow. It builds a Python wheel and a Linux PyInstaller executable, then attaches both to the GitHub release. The executable is Linux-only.
 
 ## Project layout
 
-```
-im-python/
-├─ .github/
-│  └─ workflows/
-│     ├─ build.yaml
-│     └─ test.yaml
-├─ installer/
-│  └─ ImPython.spec
-
-├─ scripts/
-│  └─ run_app.py
-├─ src/
-│  └─ im_python/
-│     ├─ assets/
-│     │  └─ app_settings/
-│     │     └─ icon.png
-│     ├─ __init__.py
-│     ├─ __main__.py
-│     ├─ cli.py
-│     └─ gui.py
-├─ tests/
-│  └─ test_basic.py
-├─ LICENSE
-├─ Makefile
-├─ pyproject.toml
-└─ README.md
+```text
+.github/workflows/   CI and tagged-release workflows
+installer/           PyInstaller specification
+scripts/             Direct app launcher used by packaging
+src/im_python/       CLI, GUI, logging, and bundled assets
+tests/               Unit tests
+pyproject.toml       Package metadata and optional dependencies
+Makefile             Local development and packaging commands
 ```
 
-## Licene
+## License
 
 [MIT](LICENSE)
 
