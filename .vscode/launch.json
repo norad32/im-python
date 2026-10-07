@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: im-python",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "im_python",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
